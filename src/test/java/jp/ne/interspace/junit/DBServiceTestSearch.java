@@ -281,7 +281,7 @@ public class DBServiceTestSearch {
 				out.setClientIdentifier(in.getClientIdentifier());
 				out.setBtcAddress(in.getBtcAddress());
 				out.setCountryCode(in.getCountryCode());
-
+				out.setAvatar(in.getAvatar());
 				List<TransactionModelIn> tInList = in.getTransactions();
 				if (tInList != null) {
 					List<TransactionModelOut> tOutList = new ArrayList<>();
