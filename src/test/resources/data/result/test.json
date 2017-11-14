@@ -1,0 +1,77 @@
+[
+	{
+		"_id": {
+			"$oid": "5979aff3fc13ae1105000182"
+		},
+		"client_identifier": "c066000b6e75adcef9b402e3fd532233775259925a285ac5d45fd6ef1e96f702",
+		"btc_address": "17RnwvftgfPc1bxhGPjfErXksQY1w5hVEn",
+		"country_code": "SY",
+		"avatar": "https://robohash.org/quoullamnulla.png?size=150x150&set=set1",
+		"transactions": [
+			{
+				"item": "Atorvastatin Calcium",
+				"payment": 8.70925758,
+				"date": "2017-06-14T14:56:22Z"
+			},
+			{
+				"item": "Seborrheic",
+				"payment": 7.7802313,
+				"date": "2017-04-04T09:22:34Z"
+			},
+			{
+				"item": "Potassium Chloride in Dextrose and Sodium Chloride",
+				"payment": 7.11699604,
+				"date": "2017-04-28T17:07:02Z"
+			},
+			{
+				"item": "DG Health Fast Acting Mucus Relief",
+				"payment": 8.17590635,
+				"date": "2017-05-28T15:56:33Z"
+			},
+			{
+				"item": "Desmopressin Acetate",
+				"payment": 6.65539775,
+				"date": "2017-06-16T06:33:48Z"
+			},
+			{
+				"item": "OLANZAPINE",
+				"payment": 1.34070579,
+				"date": "2017-04-15T19:48:09Z"
+			}
+		]
+	},
+	{
+		"_id": {
+			"$oid": "5979aff3fc13ae110500019e"
+		},
+		"client_identifier": "4784c2dada7d3899ad30f2fd294047eb29c31d8af7bde8352f679d17cbeb5432",
+		"btc_address": "1NVuNtTCMDFxkmPcJbtSsQGc3QaaAhM1mT",
+		"transactions": [
+			{
+				"item": "Cyclobenzaprine Hydrochloride",
+				"payment": 8.84755169,
+				"date": "2017-06-17T14:35:59Z"
+			},
+			{
+				"item": "Nicotine",
+				"payment": 7.93736697,
+				"date": "2017-06-13T19:04:12Z"
+			},
+			{
+				"item": "Benzonatate",
+				"payment": 4.16216986,
+				"date": "2017-06-14T00:22:53Z"
+			},
+			{
+				"item": "Gas Relief",
+				"payment": 8.94085721,
+				"date": "2017-06-13T04:24:20Z"
+			},
+			{
+				"item": "Arnica Stannum",
+				"payment": 1.16451557,
+				"date": "2017-05-12T16:39:25Z"
+			}
+		]
+	}
+]
