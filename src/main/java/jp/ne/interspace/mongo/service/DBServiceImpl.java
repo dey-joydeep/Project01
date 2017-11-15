@@ -24,7 +24,6 @@ import org.bson.Document;
 import org.bson.conversions.Bson;
 
 import com.google.gson.Gson;
-import com.mongodb.BasicDBObject;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
@@ -35,45 +34,66 @@ public class DBServiceImpl implements DBService {
 
 	private MongoDatabase database;
 	private DBProperty dbProperty;
+	private MongoCollection<Document> collection;
 
 	public DBServiceImpl() {
 		if (dbProperty == null)
-			dbProperty = DBProperty.getInstance(Commons.DB_PROPERTIES_FILE_PATH);
+			dbProperty = DBProperty
+					.getInstance(Commons.DB_PROPERTIES_FILE_PATH);
 		this.database = Configurator.getDatabase();
+	}
+
+	public DBServiceImpl(MongoDatabase database) {
+		this.database = database;
+	}
+
+	public void init() {
+		this.collection = Configurator.getDatabase().getCollection(
+				dbProperty.getCollection());
 	}
 
 	public void insert(String datapath) {
 		try {
 			String btcData = CommonUtil.readTextFile(datapath);
-
 			Gson gson = new Gson();
 			RootModel rootModel = gson.fromJson(btcData, RootModel.class);
 			List<DataModelIn> dataModelList = rootModel.getData();
 			List<Document> docList = new ArrayList<>();
-			dataModelList.forEach(dataModel -> {
-				Document doc = new Document(DBConstants.FIELD_ID, dataModel.getId())
-						.append(DBConstants.FIELD_CLIENT_ID, dataModel.getClientIdentifier())
-						.append(DBConstants.FIELD_BTC_ADDR, dataModel.getBtcAddress())
-						.append(DBConstants.FIELD_COUNTRY_CODE, dataModel.getCountryCode())
-						.append(DBConstants.FIELD_AVATAR, dataModel.getAvatar());
+			dataModelList
+					.forEach(dataModel -> {
+						Document doc = new Document(DBConstants.FIELD_ID,
+								dataModel.getId())
+								.append(DBConstants.FIELD_CLIENT_ID,
+										dataModel.getClientIdentifier())
+								.append(DBConstants.FIELD_BTC_ADDR,
+										dataModel.getBtcAddress())
+								.append(DBConstants.FIELD_COUNTRY_CODE,
+										dataModel.getCountryCode())
+								.append(DBConstants.FIELD_AVATAR,
+										dataModel.getAvatar());
 
-				List<TransactionModelIn> transactions = dataModel.getTransactions();
-				if (transactions != null && !transactions.isEmpty()) {
-					List<Document> innerDocList = new ArrayList<>();
-					transactions.forEach(transaction -> {
-						Document innerDoc = new Document();
-						innerDoc.append(DBConstants.FIELD_ITEM, transaction.getItem())
-								.append(DBConstants.FIELD_PAYMENT, transaction.getPayment())
-								.append(DBConstants.FIELD_DATE, transaction.getDate());
-						innerDocList.add(innerDoc);
+						List<TransactionModelIn> transactions = dataModel
+								.getTransactions();
+						if (transactions != null && !transactions.isEmpty()) {
+							List<Document> innerDocList = new ArrayList<>();
+							transactions.forEach(transaction -> {
+								Document innerDoc = new Document();
+								innerDoc.append(DBConstants.FIELD_ITEM,
+										transaction.getItem())
+										.append(DBConstants.FIELD_PAYMENT,
+												transaction.getPayment())
+										.append(DBConstants.FIELD_DATE,
+												transaction.getDate());
+								innerDocList.add(innerDoc);
+							});
+							doc.append(DBConstants.FIELD_TRANSACTIONS,
+									innerDocList);
+						} else {
+							doc.append(DBConstants.FIELD_TRANSACTIONS, null);
+						}
+						docList.add(doc);
 					});
-					doc.append(DBConstants.FIELD_TRANSACTIONS, innerDocList);
-				} else {
-					doc.append(DBConstants.FIELD_TRANSACTIONS, null);
-				}
-				docList.add(doc);
-			});
-			MongoCollection<Document> collection = database.getCollection(dbProperty.getCollection());
+
 			collection.insertMany(docList);
 		} catch (IOException e) {
 			log.error(Messages.ERR_DATA_INSERT_FAILED, e);
@@ -86,15 +106,13 @@ public class DBServiceImpl implements DBService {
 	}
 
 	public List<DataModelOut> fetchAll() {
-		MongoCollection<Document> collection = database.getCollection(dbProperty.getCollection());
 		FindIterable<Document> data = collection.find();
-
 		return mapToModel(data);
 	}
 
-	public List<DataModelOut> fetchDataWithSingleCondition(String searchColumn, Object searchValue, Operations op) {
+	public List<DataModelOut> fetchDataWithSingleCondition(String searchColumn,
+			Object searchValue, Operations op) {
 
-		MongoCollection<Document> collection = database.getCollection(dbProperty.getCollection());
 		FindIterable<Document> data = null;
 
 		switch (op) {
@@ -109,7 +127,8 @@ public class DBServiceImpl implements DBService {
 			data = collection.find(f);
 			break;
 		case LIKE:
-			Pattern regex = Pattern.compile(searchValue.toString(), Pattern.CASE_INSENSITIVE);
+			Pattern regex = Pattern.compile(searchValue.toString(),
+					Pattern.CASE_INSENSITIVE);
 			data = collection.find(Filters.eq(searchColumn, regex));
 			break;
 		default:
@@ -119,23 +138,21 @@ public class DBServiceImpl implements DBService {
 		return mapToModel(data);
 	}
 
-	public List<DataModelOut> fetchDateBetween(String searchColumn, Date fromDate, Date toDate) {
-		MongoCollection<Document> collection = database.getCollection(dbProperty.getCollection());
-		Bson filters = Filters.and(Filters.gte(searchColumn, fromDate), Filters.lte(searchColumn, toDate));
-
-		BasicDBObject query = new BasicDBObject(searchColumn,
-				new BasicDBObject("$gte", fromDate).append("$lte", toDate));
-
+	public List<DataModelOut> fetchDateBetween(String searchColumn,
+			Date fromDate, Date toDate) {
+		Bson filters = Filters.and(Filters.gte(searchColumn, fromDate),
+				Filters.lte(searchColumn, toDate));
 		FindIterable<Document> data = collection.find(filters);
 
 		return mapToModel(data);
 	}
 
-	public List<DataModelOut> fetchDateBetweenWithClientID(String idColumn, String idValue, String rangeColumn,
-			Date fromDate, Date toDate) {
-		MongoCollection<Document> collection = database.getCollection(dbProperty.getCollection());
-		Bson filters = Filters.and(Filters.eq(idColumn, idValue),
-				Filters.and(Filters.gte(rangeColumn, fromDate), Filters.lte(rangeColumn, toDate)));
+	public List<DataModelOut> fetchDateBetweenWithClientID(String idColumn,
+			String idValue, String rangeColumn, Date fromDate, Date toDate) {
+		Bson filters = Filters.and(
+				Filters.eq(idColumn, idValue),
+				Filters.and(Filters.gte(rangeColumn, fromDate),
+						Filters.lte(rangeColumn, toDate)));
 		FindIterable<Document> data = collection.find(filters);
 
 		return mapToModel(data);
@@ -147,7 +164,8 @@ public class DBServiceImpl implements DBService {
 	 * @param documentCollection
 	 * @return List of {@link DataModelOut}
 	 */
-	private List<DataModelOut> mapToModel(FindIterable<Document> documentCollection) {
+	private List<DataModelOut> mapToModel(
+			FindIterable<Document> documentCollection) {
 		List<DataModelOut> dataModelList = new ArrayList<>();
 		if (documentCollection != null) {
 			Iterator<Document> docIterator = documentCollection.iterator();
@@ -156,7 +174,8 @@ public class DBServiceImpl implements DBService {
 				Document document = docIterator.next();
 				String jsonData = document.toJson();
 				Gson gson = new Gson();
-				DataModelOut dataModelOut = gson.fromJson(jsonData, DataModelOut.class);
+				DataModelOut dataModelOut = gson.fromJson(jsonData,
+						DataModelOut.class);
 				dataModelList.add(dataModelOut);
 			}
 		}
@@ -164,6 +183,6 @@ public class DBServiceImpl implements DBService {
 	}
 
 	public long getRecordCount() {
-		return database.getCollection(dbProperty.getCollection()).count();
+		return collection.count();
 	}
 }
